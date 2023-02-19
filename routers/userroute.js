@@ -1,6 +1,6 @@
 const express = require("express")
 const userRouter = express.Router()
-const {userModel} = require("../model/usermodel")
+const { userModel } = require("../model/usermodel")
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt")
 
@@ -44,7 +44,7 @@ const bcrypt = require("bcrypt")
  *                              $ref:"#/components/schemas/User"
  */
 
-userRouter.get("/",async(req,res)=>{
+userRouter.get("/", async (req, res) => {
     try {
         let user = await userModel.find()
         res.send(user)
@@ -54,41 +54,41 @@ userRouter.get("/",async(req,res)=>{
 })
 
 
-userRouter.post("/register",async(req,res)=>{
+userRouter.post("/register", async (req, res) => {
 
-    const {name,email,password} = req.body
+    const { name, email, password } = req.body
 
     try {
-        bcrypt.hash(password,5,async(err,hash)=>{
-            if(err)res.send(err)
-            else{
-                const user = new userModel({name,email,password:hash})
+        bcrypt.hash(password, 5, async (err, hash) => {
+            if (err) res.send(err)
+            else {
+                const user = new userModel({ name, email, password: hash })
                 await user.save()
                 res.send("user register")
             }
         })
-       
+
     } catch (error) {
         res.send(error)
     }
 })
 
-userRouter.post("/login",async(req,res)=>{
-    const {email,password}=req.body
+userRouter.post("/login", async (req, res) => {
+    const { email, password } = req.body
     try {
-        const user = await userModel.find({email})
-        if(user.length>0){
-            bcrypt.compare(password,user[0].password,(err,result)=>{
-                if(result){
-                    let token = jwt.sign({userID:user[0]._id},"masai")
-                    res.send({"msg":"login success","token":token})
+        const user = await userModel.find({ email })
+        if (user.length > 0) {
+            bcrypt.compare(password, user[0].password, (err, result) => {
+                if (result) {
+                    let token = jwt.sign({ userID: user[0]._id }, "masai")
+                    res.send({ "msg": "login success", "token": token })
                 }
-                else{
+                else {
                     res.send("wrong details")
                 }
             })
         }
-        else{
+        else {
             res.send("something is wrong")
         }
     } catch (error) {
@@ -96,28 +96,61 @@ userRouter.post("/login",async(req,res)=>{
     }
 })
 
-userRouter.delete("/delete/:id",async(req,res)=>{
+userRouter.delete("/delete/:id", async (req, res) => {
     const ID = req.params.id
 
-   try {
-    await userModel.findByIdAndDelete({_id:ID})
-    res.send("user deleted")
-  
-   } catch (error) {
-    res.send(error)
-   }
+    try {
+        await userModel.findByIdAndDelete({ _id: ID })
+        res.send("user deleted")
+
+    } catch (error) {
+        res.send(error)
+    }
 })
 
-userRouter.patch("/update/:id",async(req,res)=>{
+/**
+* @swagger
+* /users/update/{id}:
+* patch:
+*   summary: It will update the user details
+*   tags: [Users]
+*   parameters:
+*       - in: path
+*       name: id
+*       schema:
+*           type: string
+*       required: true
+*       description: The book id
+*      requestBody:
+*       required: true
+*       content:
+*           application/json:
+*              schema:
+*                $ref: '#/components/schemas/User'
+*    responses:
+*        200:
+*            description: The user Deatils has been updated
+*            content:
+*               application/json:
+*                  schema:
+*                    $ref: '#/components/schemas/User'
+*        404:
+*           description: The user was not found
+*        500:
+*           description: Some error happened
+*/
+
+
+userRouter.patch("/update/:id", async (req, res) => {
     const ID = req.params.id
     const payload = req.body
-   try {
-    await userModel.findByIdAndUpdate({_id:ID},payload)
-    res.send("user updated")
-  
-   } catch (error) {
-    res.send(error)
-   }
+    try {
+        await userModel.findByIdAndUpdate({ _id: ID }, payload)
+        res.send("user updated")
+
+    } catch (error) {
+        res.send(error)
+    }
 })
 
-module.exports={userRouter}
+module.exports = { userRouter }
