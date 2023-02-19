@@ -110,9 +110,9 @@ userRouter.delete("/delete/:id",async(req,res)=>{
 
 userRouter.patch("/update/:id",async(req,res)=>{
     const ID = req.params.id
-
+    const payload = req.body
    try {
-    await userModel.findByIdAndUpdate({_id:ID})
+    await userModel.findByIdAndUpdate({_id:ID},payload)
     res.send("user updated")
   
    } catch (error) {
